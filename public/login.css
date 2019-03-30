@@ -1,0 +1,30 @@
+.btnSubmit {
+    width: 40%;
+    border-radius: 1rem;
+    padding: 2%;
+    border: none;
+    cursor: pointer;
+    margin-left: 30%;
+    margin-right: 30%;
+    font-size: 25px;
+}
+.login {
+    margin-top: 5%;
+    margin-bottom: 5%;
+    margin-left: 20%;
+    margin-right: 20%;
+    padding: 5%;
+    box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.2), 0 9px 26px 0 rgba(0, 0, 0, 0.19);
+    align-content: center;
+}
+.form-group {
+    padding: 5%;
+}
+.form-control {
+    font-size: 30px;
+}
+.title {
+    font-size: 75px;
+    text-align: center;
+    margin-top: 0%;
+}
