@@ -4,6 +4,7 @@ var path = require('path');
 var app = express();
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
+//var mongoose = require('mongoose');
 
 //var db = require('./config/db');
 
@@ -15,7 +16,7 @@ app.use(express.static('public'));
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'public'))
 
-// mongoose.connect(db.url);
+//mongoose.connect(db.url);
 
 /*app.get('/', function(req, res) {
     res.render('log.html');
