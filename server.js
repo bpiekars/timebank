@@ -7,7 +7,8 @@ var methodOverride = require('method-override');
 
 //var db = require('./config/db');
 
-var port = process.env.PORT || 7000;
+var port = process.env.PORT || 8080;
+var router = express.Router()
 
 app.use(express.static('public'));
 
@@ -16,8 +17,15 @@ app.set('views', path.join(__dirname, 'public'))
 
 // mongoose.connect(db.url);
 
-app.get('/', function(req, res) {
-    res.render('login.html');
-});
-
+/*app.get('/', function(req, res) {
+    res.render('log.html');
+}); */
+/*
+const handler = (req, res) => res.send(path.join(__dirname), 'public/index.html');
+const routes = ["/", "/login"];
+routes.forEach(route => app.get(route, handler));
+*/
+app.get('/login', (req, res) => {
+    res.sendfile(__dirname + '/public/login.html');
+})
 app.listen(port);
