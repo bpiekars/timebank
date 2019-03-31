@@ -4,4 +4,10 @@ class Auth {
     static isEmailValid(email) {
         return validator.isEmail(email);
     }
+
+    static isPasswordValid(pass) {
+        return pass.length >= 8;
+    }
+
+    
 }
