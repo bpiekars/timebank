@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 
 class User {
-    constructor() {
+    /*constructor() {
        this.userSchema = new mongoose.Schema({
             email: {
                 type: String,
@@ -15,5 +15,11 @@ class User {
             hash: String,
             salt: String
         });
+    } */
+    constructor(email, firstname, lastname, hash) {
+        this.email = email;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.hash = hash;
     }
 }
