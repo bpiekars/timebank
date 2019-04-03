@@ -21,12 +21,19 @@ app.set('views', path.join(__dirname, 'public'))
 /*app.get('/', function(req, res) {
     res.render('log.html');
 }); */
-/*
+
 const handler = (req, res) => res.send(path.join(__dirname), 'public/index.html');
-const routes = ["/", "/login"];
+const routes = ["/", "/login", "/register"];
 routes.forEach(route => app.get(route, handler));
-*/
-app.get('/login', (req, res) => {
+
+/*app.get('/login', (req, res) => {
     res.sendfile(__dirname + '/public/login.html');
-})
+})*/
 app.listen(port);
+
+/*var appl = angular.module('timebank', ['ngMaterial']);
+appl.controller('SidenavController', ($scope, $mdSidenav) => {
+    $scope.openLeftMenu = () => {
+        $mdSidenav('left').toggle();
+    };
+});*/

@@ -9,5 +9,8 @@ class Auth {
         return pass.length >= 8;
     }
 
+    static initializeSchema() {
+        
+    }
     
 }

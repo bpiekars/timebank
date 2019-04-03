@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-route.js"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="feed.css">
+        <script src="feed.js"></script>
+    </head>
+    <body>
+        <div layout="row" ng-controller="SidenavController">
+            <md-sidenav md-component-id="left" class="md-sidenav-left">
+                Left Nav!
+            </md-sidenav>
+            <md-content>
+                Center content!
+                <md-button ng-click="openLeftMenu()">
+                    Open Left Menu!
+                </md-button>
+            </md-content>
+            <md-sidenav md-component-id="right" md-is-locked-open="$mdMedia('min-width: 333px')" class="md-sidenav-right">
+                <form>
+                  <md-input-container>
+                    <label for="testInput">Test input</label>
+                    <input id="testInput" type="text" ng-model="data" md-autofocus>
+                  </md-input-container>
+                </form>
+              </md-sidenav>
+        </div>
+    </body>
+</html>
