@@ -7,10 +7,5 @@ class Auth {
 
     static isPasswordValid(pass) {
         return pass.length >= 8;
-    }
-
-    static initializeSchema() {
-        
-    }
-    
+    }    
 }
