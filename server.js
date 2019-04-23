@@ -21,7 +21,6 @@ app.use(express.static('public'));
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'public'))
 
-
 // connect to database
 var url = 'mongodb://localhost:27017'; // global variable for database location
 mongoose.connect(url);
