@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 // Create Schema and Model
-const Post = new Schema({
+var Post = new Schema({
 	img : { data: Buffer, imgType: String },
 	body: String,
 	author: String,
