@@ -21,15 +21,13 @@ app.use(express.static('public'));
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'public'))
 
+
 // connect to database
 var url = 'mongodb://localhost:27017'; // global variable for database location
 mongoose.connect(url);
-//mongoose.connect(db.url);
-// test if mongoose connection to mongodb server is open, print log to console indicating status
-mongoose.connection.once('open', function(){
-	console.log("Connected to MongoDB!");
-}).on('error', function(error){
-	console.log('Connection error:', error);
+mongoose.connect(url, function(error){
+    if(error) console.log(error);
+        console.log("Connected to MongoDB!");
 });
 
 /*app.get('/', function(req, res) {
