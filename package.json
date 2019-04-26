@@ -1,7 +1,11 @@
 {
-  "name": "timebank-cleaned",
+  "name": "timebank",
   "version": "1.0.0",
   "description": "1. Install Node.js\r 2. Run Node.js command prompt\r 3. Make sure current directory is \"timebank-master\"\r 4. Run command \"npm install\"\r 5. Run \"node server.js\"\r 6. Navigate to \"localhost:8080\" in a web browser",
+  "repository": {
+  "type": "git",
+  "url": "git://github.com/pieman353/timebank.git"
+  },
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -21,5 +25,6 @@
     "multer": "^1.4.1",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0"
-  }
+  },
+  "devDependencies": {}
 }
