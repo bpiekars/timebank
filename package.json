@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "1. Install Node.js\r 2. Run Node.js command prompt\r 3. Make sure current directory is \"timebank-master\"\r 4. Run command \"npm install\"\r 5. Run \"node server.js\"\r 6. Navigate to \"localhost:8080\" in a web browser",
   "repository": {
-  "type": "git",
-  "url": "git://github.com/pieman353/timebank.git"
+    "type": "git",
+    "url": "git://github.com/pieman353/timebank.git"
   },
   "main": "app.js",
   "scripts": {
@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.4",
     "express": "^4.16.4",
