@@ -1,5 +1,5 @@
-# Instructions on How to Run
-
+# Timebank App
+# Installation
 1. Install Node.js and MongoDB.
 2. Run MongoDB in a terminal window
 - Windows:
