@@ -1,50 +1,46 @@
-var express = require('express'); // Express is a web application framework for NodeJs
-var pug = require('pug');
-var path = require('path'); // Node Js path module provides waty
-var bodyParser = require('body-parser'); // Express package body-parser parses http post request body
-var methodOverride = require('method-override');
-var cookieParser = require('cookie-parser'); // package that generates and stores local cookies
-var logger = require('morgan'); // Express HTTP logger middleware
-var passport = require('passport'); // package used for user authentication in express
-var mongoose = require('mongoose'); // Mongoose package required to work with MongoDB
+const express = require('express'); // import express moodule
+const mongoose = require('mongoose'); // import mongoose module
+const path = require('path'); // import nodejs path module for working with files and directories
 /* var routes = require('./routes/index');
-var users = require('./routes/users'); */
+var users = require('./routes/users'); */ // not sure what these lines are for
 
-var app = express(); // create new express application
-//var db = require('./config/db');
+var url = "mongodb://localhost:27017/timebank"; // global variable mongodb url, currently local database
+var app = express(); // initialize express application
 
-var port = process.env.PORT || 8080;
+// initialize express router and tell web server to listen on port 8080
+var port = process.env.PORT || 8080; // set port to whatever PORT value is or 8080 if not available
 var router = express.Router()
+//var db = require('./config/db'); // haven't yet setup db config file
 
+// server images, css, html files in directory public
 app.use(express.static('public'));
 
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'public'))
+/*
+//Get the default connection
+var db = mongoose.connection;
 
-// connect to database
-var url = 'mongodb://localhost:27017'; // global variable for database location
-mongoose.connect(url);
-mongoose.connect(url, function(error){
-    if(error) console.log(error);
-        console.log("Connected to MongoDB!");
-});
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+*/
 
-/*app.get('/', function(req, res) {
-    res.render('log.html');
-}); */
+// Conenct to MongoDB and check connection
+mongoose.connect(url, { useNewUrlParser: true }, function(err, db) {
+  if(err){
+  	console.log(err);
+  }
+  else {
+  	console.log("MongoDB connection successfully established to url: " + url);
+  	mongoose.connection.close();
+  	console.log("Connection status: " + mongoose.connection.readyState);
+  }
+})
 
+// deliver index.html file to be viewed default at port 8080
 const handler = (req, res) => res.send(path.join(__dirname), 'public/index.html');
+//angular js routes, root, login, register
 const routes = ["/", "/login", "/register"];
+// for each route, use route handler to direct to index
 routes.forEach(route => app.get(route, handler));
 
-/*app.get('/login', (req, res) => {
-    res.sendfile(__dirname + '/public/login.html');
-})*/
+// web server listens on specificed port 8080
 app.listen(port);
-
-/*var appl = angular.module('timebank', ['ngMaterial']);
-appl.controller('SidenavController', ($scope, $mdSidenav) => {
-    $scope.openLeftMenu = () => {
-        $mdSidenav('left').toggle();
-    };
-});*/
