@@ -48,6 +48,8 @@ var expressValidator = require('express-validator');
 var express = require('express');
 var server = express.Router();
 var bcrypt = require('bcryptjs');
+var loginVal = require('./public/login.js');
+var $ = require('jquery');
 
 // use express validator for req.checkBody
 var app = express();
@@ -179,7 +181,8 @@ app.route('/login')
         res.sendFile(__dirname + '/public/login.html');
     })
     .post((req, res) => {
-        var url = 'mongodb://localhost:27017/timebank'
+    loginVal.validate();
+        var url = 'mongodb://localhost:27017/timebank';
         var db = mongoose.connect(url, { useNewUrlParser: true }, function(err, db) {
             if(err){
                 console.log(err);
