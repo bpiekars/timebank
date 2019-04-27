@@ -1,31 +1,106 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-route.js"></script>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <link rel="stylesheet" href="feed.css">
-        <script src="feed.js"></script>
-    </head>
-    <body>
-        <div layout="row" ng-controller="SidenavController">
-            <md-sidenav md-component-id="left" class="md-sidenav-left">
-                Left Nav!
-            </md-sidenav>
-            <md-content>
-                Center content!
-                <md-button ng-click="openLeftMenu()">
-                    Open Left Menu!
+<html lang="en" >
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Angular Material style sheet -->
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.css">
+    <title>Yo</title>
+</head>
+<body ng-app="timebank" ng-cloak>
+<!--
+  Your HTML content here
+-->
+<div ng-controller="AppCtrl" layout="column" style="height:500px;" ng-cloak="" class="sidenavdemoBasicUsage" ng-app="MyApp">
+
+    <section layout="row" flex="">
+
+        <md-sidenav class="md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-md')" md-whiteframe="4">
+
+            <md-toolbar class="md-theme-indigo">
+                <h1 class="md-toolbar-tools">Sidenav Left</h1>
+            </md-toolbar>
+            <md-content layout-padding="" ng-controller="LeftCtrl">
+                <md-button ng-click="close()" class="md-primary" hide-gt-md="">
+                    Close Sidenav Left
+                </md-button>
+                <p hide="" show-gt-md="">
+                    This sidenav is locked open on your device. To go back to the default behavior,
+                    narrow your display.
+                </p>
+            </md-content>
+
+        </md-sidenav>
+
+        <md-content flex="" layout-padding="">
+
+            <div layout="column" layout-align="top center">
+                <p>
+                    The left sidenav will 'lock open' on a medium (˃=960px wide) device.
+                </p>
+                <p>
+                    The right sidenav will focus on a specific child element.
+                </p>
+
+                <div>
+                    <md-button ng-click="toggleLeft()" class="md-primary" hide-gt-md="">
+                        Toggle left
+                    </md-button>
+                </div>
+
+                <div>
+                    <md-button ng-click="toggleRight()" ng-hide="isOpenRight()" class="md-primary">
+                        Toggle right
+                    </md-button>
+
+                </div>
+            </div>
+
+            <div flex=""></div>
+
+        </md-content>
+
+        <md-sidenav class="md-sidenav-right md-whiteframe-4dp" md-component-id="right">
+
+            <md-toolbar class="md-theme-light">
+                <h1 class="md-toolbar-tools">Sidenav Right</h1>
+            </md-toolbar>
+            <md-content ng-controller="RightCtrl" layout-padding="">
+                <form>
+                    <md-input-container>
+                        <label for="testInput">Test input</label>
+                        <input type="text" id="testInput" ng-model="data" md-autofocus="">
+                    </md-input-container>
+                </form>
+                <md-button ng-click="close()" class="md-primary">
+                    Close Sidenav Right
                 </md-button>
             </md-content>
-            <md-sidenav md-component-id="right" md-is-locked-open="$mdMedia('min-width: 333px')" class="md-sidenav-right">
-                <form>
-                  <md-input-container>
-                    <label for="testInput">Test input</label>
-                    <input id="testInput" type="text" ng-model="data" md-autofocus>
-                  </md-input-container>
-                </form>
-              </md-sidenav>
-        </div>
-    </body>
+
+        </md-sidenav>
+
+    </section>
+
+</div>
+
+<!-- Angular Material requires Angular.js Libraries -->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-aria.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-messages.js"></script>
+<script src="http://ngmaterial.assets.s3.amazonaws.com/svg-assets-cache.js"></script>
+
+<!-- Angular Material Library -->
+<script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.js"></script>
+
+<!-- Your application bootstrap  -->
+    /**
+     * You must include the dependency on 'ngMaterial'
+     */
+<script src="feed.js"></script>
+
+</body>
 </html>
+
+<!--
+Copyright 2016-2019 Google Inc. All Rights Reserved.
+Use of this source code is governed by an MIT-style license that can be found in the LICENSE file at https://material.angularjs.org/latest/license.
+-->

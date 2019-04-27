@@ -1,95 +1,186 @@
-//import mongoose from 'mongoose';
-
-const express = require('express'); // import express moodule
-const mongoose = require('mongoose'); // import mongoose module
-const path = require('path'); // import nodejs path module for working with files and directories
-/* var routes = require('./routes/index');
-var users = require('./routes/users'); */ // not sure what these lines are for
+/*var express = require('express');
+var pug = require('pug');
+var path = require('path');
+var app = express();
 var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+//var mongoose = require('mongoose');
 
-var url = "mongodb://localhost:27017/timebank"; // global variable mongodb url, currently local database
-var app = express(); // initialize express application
+//var db = require('./config/db');
 
-// initialize express router and tell web server to listen on port 8080
-var port = process.env.PORT || 8080; // set port to whatever PORT value is or 8080 if not available
+var port = process.env.PORT || 8080;
 var router = express.Router()
-//var db = require('./config/db'); // haven't yet setup db config file
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// server images, css, html files in directory public
 app.use(express.static('public'));
-/*var db = mongoose.connect("mongodb://localhost:27017/dumaaksjkahsjkhas");
-var mod = new mongoose.Schema({name: String});
-var Mod = mongoose.model('Mod', mod);
-Mod.create({name: "Adam"}, function(err, doc) {});*/
-/*
-//Get the default connection
-var db = mongoose.connection;
 
-//Bind connection to error event (to get notification of connection errors)
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-*/
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'public'))
 
-// Conenct to MongoDB and check connection
-mongoose.connect(url, { useNewUrlParser: true }, function(err, db) {
-  if(err){
-  	console.log(err);
-  }
-  else {
-  	console.log("MongoDB connection successfully established to url: " + url);
-  	mongoose.connection.close();
-  	console.log("Connection status: " + mongoose.connection.readyState);
-  }
-})
+//server.js
+//mongoose.connect(db.url);
+
+/*app.get('/', function(req, res) {
+    res.render('log.html');
+}); */
+
+
+
+/*const handler = (req, res) => res.send(path.join(__dirname), 'public/index.html');
+const routes = ["/", "/login", "/register"];
+routes.forEach(route => app.get(route, handler));
+
+/*app.get('/login', (req, res) => {
+    res.sendfile(__dirname + '/public/login.html');
+})*/
+/*app.listen(port);
+
+var appl = angular.module('timebank', ['ngMaterial']);
+appl.controller('SidenavController', ($scope, $mdSidenav) => {
+    $scope.openLeftMenu = () => {
+        $mdSidenav('left').toggle();
+    };
+});*/
+var express = require('express');
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var mongoose = require('mongoose');
+
+var app = express();
+
 
 var mod = new mongoose.Schema({
-  email: String,
-  firstname: String,
-lastname: String,
-location: String,
-password: String
+    email: String,
+    firstname: String,
+    lastname: String,
+    location: String,
+    password: String
 });
 var Mod = mongoose.model('Mod', mod);
 
+app.set('port', 8080);
 
-// deliver index.html file to be viewed default at port 8080
-const handler = (req, res) => res.send(path.join(__dirname), 'public/index.html');
-//angular js routes, root, login, register
-const routes = ["/", "/login", "/register"];
-// for each route, use route handler to direct to index
-routes.forEach(route => app.get(route, handler));
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.static(__dirname + '/public'));
 
+app.use(cookieParser());
 
-// Register user information added to DB here
-app.post('/register', (req, res) => {
-  var url = 'mongodb://localhost:27017/timebank'
+app.use(session({
+    key: 'user_sid',
+    secret: 'secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        expires: 600000
+    }
+}));
 
-  var db = mongoose.connect(url, { useNewUrlParser: true }, function(err, db) {
-      if(err){
-          console.log(err);
-      }
-      else {
-          console.log("MongoDB connection successfully established to url: " + url);
-          mongoose.connection.close();
-          console.log("Connection status: " + mongoose.connection.readyState);
-      }
+app.use((req, res, next) => {
+    if (req.cookies.user_sid && !req.session.user) {
+        res.clearCookie('user_sid');
+    }
+    next();
+});
+
+// Check if user is logged in
+
+var sessionChecker = (req, res, next) => {
+    if (req.session.user && req.cookies.user_sid) {
+        res.redirect('/feed_2');
+    }
+    else {
+        next();
+    }
+};
+
+app.get('/', sessionChecker, (req, res) => {
+    res.redirect('/login');
+});
+
+// Register a user
+
+app.route('/register')
+    .get(sessionChecker, (req, res) => {
+        //res.sendfile(__dirname + '/public/register.html');
+        res.sendfile(__dirname +'/public/register.html');
+    })
+    .post((req, res) => {
+        var url = 'mongodb://localhost:27017/timebank'
+
+        var db = mongoose.connect(url, { useNewUrlParser: true }, function(err, db) {
+            if(err){
+                console.log(err);
+            }
+            else {
+                console.log("MongoDB connection successfully established to url: " + url);
+                mongoose.connection.close();
+                console.log("Connection status: " + mongoose.connection.readyState);
+            }
+        });
+        console.log(req.body);
+        var user = Mod.create({
+            /*email: req.body.email,*/ email: req.body.email,
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            location: req.body.location,
+            password: req.body.password
+        });
+        req.session.user = user.dataValues;
+        res.redirect('/feed_2');
     });
-    console.log(req.body);
-  Mod.create({
-    /*email: req.body.email,*/ email: 'fuck',
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    location: req.body.location,
-    password: req.body.password
-  });
-  res.sendFile('/register.html');
-  //console.log(req.body.email);
-  
-})
 
+// Login a user
 
-// web server listens on specificed port 8080
-app.listen(port);
+app.route('/login')
+    .get(sessionChecker, (req, res) => {
+        res.sendfile(__dirname + '/public/login.html');
+    })
+    .post((req, res) => {
+        var url = 'mongodb://localhost:27017/timebank'
+        var db = mongoose.connect(url, { useNewUrlParser: true }, function(err, db) {
+            if(err){
+                console.log(err);
+            }
+            else {
+                console.log("MongoDB connection successfully established to url: " + url);
+                mongoose.connection.close();
+                console.log("Connection status: " + mongoose.connection.readyState);
+            }
+        });
+        Mod.findOne({'email': req.body.email, 'password': req.body.password}, (err, user) => {
+            if (err) {
+                console.log("Could not find");
+                res.redirect('/login');
+                console.log("NOT FOUND");
+                //return;
+            }
+            else {
+                console.log("FOUND");
+                req.session.user = user.dataValues;
+                res.redirect('/feed_2');
+            }
+            /*else {
+              req.session.user = user.dataValues;
+              res.redirect('/feed');
+            } */
+        })
+    });
 
+// Route to homepage
+
+app.get('/feed_2', (req, res) => {
+    if (req.session.user && req.cookies.user_sid) {
+        res.clearCookie('user_sid');
+        res.redirect('/feed_2');
+        res.sendfile(__dirname + "/public/feed_2.html");
+    }
+    else {
+        res.sendfile(__dirname + "/public/feed_2.html");
+    }
+});
+
+app.use(function (req, res, next) {
+    res.status(404).send("Page unavailable")
+});
+
+app.listen(app.get('port'), () => console.log('App started'));
