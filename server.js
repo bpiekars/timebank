@@ -118,7 +118,7 @@ app.route('/register')
             }
         });
         console.log(req.body);
-        Mod.create({
+        var user = Mod.create({
             /*email: req.body.email,*/ email: req.body.email,
             firstname: req.body.firstname,
             lastname: req.body.lastname,
