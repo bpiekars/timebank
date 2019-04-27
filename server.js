@@ -40,23 +40,46 @@ appl.controller('SidenavController', ($scope, $mdSidenav) => {
         $mdSidenav('left').toggle();
     };
 });*/
-var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var mongoose = require('mongoose');
+var expressValidator = require('express-validator');
+var express = require('express');
+var server = express.Router();
+var bcrypt = require('bcryptjs');
 
+// use express validator for req.checkBody
 var app = express();
+app.use(expressValidator());
 
-
-var mod = new mongoose.Schema({
-    email: String,
-    firstname: String,
-    lastname: String,
-    location: String,
-    password: String
+var UserSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    unique: true,
+    required: true,
+    trim: true
+  },
+	firstname: { type: String, required: true },
+	lastname: { type: String, required: true },
+	location: String,
+  password: {
+    type: String,
+    required: true
+  },
+	timeBalance: { type: Number, default: 24 },
+	id: { type: Number, default: Math.random() }
 });
-var Mod = mongoose.model('Mod', mod);
+
+var User = mongoose.model('User', UserSchema);
+
+User.generateHash = function(password){
+	return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+};
+
+User.prototype.validPassword = function(password){
+	return bcrypt.compareSync(password, this.localPassword);
+};
 
 app.set('port', 8080);
 
@@ -98,16 +121,15 @@ app.get('/', sessionChecker, (req, res) => {
 });
 
 // Register a user
-
 app.route('/register')
     .get(sessionChecker, (req, res) => {
         //res.sendfile(__dirname + '/public/register.html');
         res.sendFile(__dirname +'/public/register.html');
     })
     .post((req, res) => {
-        var url = 'mongodb://localhost:27017/timebank'
+        var url = 'mongodb://localhost:27017/timebank';
 
-        var db = mongoose.connect(url, { useNewUrlParser: true }, function(err, db) {
+        var db = mongoose.connect(url, { useNewUrlParser: true, useCreateIndex: true }, function(err, db) {
             if(err){
                 console.log(err);
             }
@@ -118,19 +140,36 @@ app.route('/register')
             }
         });
         console.log(req.body);
-        var user = Mod.create({
-            /*email: req.body.email,*/ email: req.body.email,
+		// Form Validator
+		req.checkBody('email','Email address is required').notEmpty();
+		req.checkBody('email','Email address is invalid').isEmail();
+		req.checkBody('firstname','First name field is required').notEmpty();
+		req.checkBody('lastname','Last name field is required').notEmpty();
+		req.checkBody('password','Password field is required').notEmpty();
+		req.checkBody('password_conf',"Passwords do not match").equals(req.body.password);
+		
+		var errors = req.validationErrors();
+		
+		if (errors) {
+			res.render('register', {
+				errors: errors
+			});
+		} else {
+		bcrypt.hash(req.body.password, 10, function(err, hash){
+        var user = User.create({
+            email: req.body.email,
             firstname: req.body.firstname,
             lastname: req.body.lastname,
             location: req.body.location,
-            password: req.body.password
+            password: hash
         });
         req.session.user = user.dataValues;
         res.redirect('/feed_2');
-    });
+		});
+		}
+	});
 
 // Login a user
-
 app.route('/login')
     .get(sessionChecker, (req, res) => {
         res.sendFile(__dirname + '/public/login.html');
@@ -147,7 +186,7 @@ app.route('/login')
                 console.log("Connection status: " + mongoose.connection.readyState);
             }
         });
-        Mod.findOne({'email': req.body.email, 'password': req.body.password}, (err, user) => {
+        User.findOne({'email': req.body.email, 'password': req.body.password}, (err, user) => {
             if (err) {
                 console.log("Could not find");
                 res.redirect('/login');
@@ -155,6 +194,15 @@ app.route('/login')
                 //return;
             }
             else {
+				bcrypt.compare(req.body.password, user.password, function (err, result) {
+					if (result == true) {
+						console.log('Correct password');
+						res.redirect('/feed_2');
+					} else {
+						res.send('Incorrect password');
+						res.redirect('/login');
+					}
+				});
                 console.log("FOUND");
                 req.session.user = user.dataValues;
                 res.redirect('/feed_2');
@@ -163,9 +211,8 @@ app.route('/login')
               req.session.user = user.dataValues;
               res.redirect('/feed');
             } */
-        })
+        });
     });
-
 // Route to homepage
 
 app.get('/feed_2', (req, res) => {
@@ -180,7 +227,7 @@ app.get('/feed_2', (req, res) => {
 });
 
 app.use(function (req, res, next) {
-    res.status(404).send("Page unavailable")
+    res.status(404).send("Page unavailable");
 });
 
 app.listen(app.get('port'), () => console.log('App started'));
