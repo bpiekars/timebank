@@ -151,9 +151,13 @@ app.route('/register')
 		var errors = req.validationErrors();
 		
 		if (errors) {
-			res.render('register', {
+			/*res.render('register.html', {
 				errors: errors
-			});
+			}); */
+			res.sendFile(__dirname + "/public/register.html", { errors: errors });
+			/*res.sendFile('./public/register.html', {
+				errors: errors
+			}); */
 		} else {
 		bcrypt.hash(req.body.password, 10, function(err, hash){
         var user = User.create({
