@@ -102,7 +102,7 @@ app.get('/', sessionChecker, (req, res) => {
 app.route('/register')
     .get(sessionChecker, (req, res) => {
         //res.sendfile(__dirname + '/public/register.html');
-        res.sendfile(__dirname +'/public/register.html');
+        res.sendFile(__dirname +'/public/register.html');
     })
     .post((req, res) => {
         var url = 'mongodb://localhost:27017/timebank'
@@ -133,7 +133,7 @@ app.route('/register')
 
 app.route('/login')
     .get(sessionChecker, (req, res) => {
-        res.sendfile(__dirname + '/public/login.html');
+        res.sendFile(__dirname + '/public/login.html');
     })
     .post((req, res) => {
         var url = 'mongodb://localhost:27017/timebank'
@@ -172,10 +172,10 @@ app.get('/feed_2', (req, res) => {
     if (req.session.user && req.cookies.user_sid) {
         res.clearCookie('user_sid');
         res.redirect('/feed_2');
-        res.sendfile(__dirname + "/public/feed_2.html");
+        res.sendFile(__dirname + "/public/feed_2.html");
     }
     else {
-        res.sendfile(__dirname + "/public/feed_2.html");
+        res.sendFile(__dirname + "/public/feed_2.html");
     }
 });
 
