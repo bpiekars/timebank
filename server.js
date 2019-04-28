@@ -48,9 +48,7 @@ var expressValidator = require('express-validator');
 var express = require('express');
 var server = express.Router();
 var bcrypt = require('bcryptjs');
-var loginVal = require('./public/login.js');
-var $ = require('jquery');
-
+var login = require('./public/login.js');
 // use express validator for req.checkBody
 var app = express();
 app.use(expressValidator());
@@ -108,7 +106,6 @@ app.use((req, res, next) => {
 });
 
 // Check if user is logged in
-
 var sessionChecker = (req, res, next) => {
     if (req.session.user && req.cookies.user_sid) {
         res.redirect('/feed_2');
@@ -181,7 +178,6 @@ app.route('/login')
         res.sendFile(__dirname + '/public/login.html');
     })
     .post((req, res) => {
-    loginVal.validate();
         var url = 'mongodb://localhost:27017/timebank';
         var db = mongoose.connect(url, { useNewUrlParser: true }, function(err, db) {
             if(err){
@@ -194,11 +190,15 @@ app.route('/login')
             }
         });
         User.findOne({'email': req.body.email, 'password': req.body.password}, (err, user) => {
-            if (err) {
-                console.log("Could not find");
-                res.redirect('/login');
-                console.log("NOT FOUND");
-                //return;
+            if (!user) {
+                //throw new Error('User does not exist');
+                var error = "User does not exist";
+                console.log(error);
+                //res.render('/login', { error: req.session.error });
+                //res.redirect('/login');
+                login.findError(error);
+                res.sendfile(__dirname + "/public/login.html");
+                //document.getElementById('errorname').innerHTML="this is an invalid name"; 
             }
             else {
 				bcrypt.compare(req.body.password, user.password, function (err, result) {
@@ -221,7 +221,6 @@ app.route('/login')
         });
     });
 // Route to homepage
-
 app.get('/feed_2', (req, res) => {
     if (req.session.user && req.cookies.user_sid) {
         res.clearCookie('user_sid');

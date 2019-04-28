@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.js"></script>
@@ -8,11 +7,11 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <script src="/login.js"></script>
+    <!--<script src="login.js"></script>-->
 </head>
 <body>
 <div class="main">
-    <form method="post" action="/login" name = "login" onsubmit= "return(validate());">
+    <form method="post" action="/login" name = "login">
         <p class="title">
             Timebank
         </p>
@@ -22,11 +21,13 @@
         <p class="logo">
             <img src="https://i.ibb.co/XS0Swy3/2cee4bf8-ac31-4c3c-89c7-f62f360ae00f.png" alt="Timebank" style="width:200px;height:200px;">
         </p>
-        <div class="form-group">
-            <input type="text" class="form-control" name = "email" placeholder="Email address" value="" />
+        <div class="error" id="errorname">
         </div>
         <div class="form-group">
-            <input type="password" class="form-control" name = "password" placeholder="Password" value="" />
+            <input type="email" class="form-control" name = "email" placeholder="Email address" value="" required/>
+        </div>
+        <div class="form-group">
+            <input type="password" class="form-control" name = "password" placeholder="Password" value="" required minlenth="8"/>
         </div>
         <div class="form-group">
             <input type="submit" class="btnSubmit" placeholder="Login" value="Submit"/>
@@ -38,5 +39,6 @@
         </p>
     </form>
 </div>
+<script src="login.js"></script>
 </body>
 </html>
