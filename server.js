@@ -49,7 +49,9 @@ var express = require('express');
 var server = express.Router();
 var bcrypt = require('bcryptjs');
 var app = express();
+var User = require('./models/User.js');
 
+/*
 var UserSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -66,9 +68,10 @@ var UserSchema = new mongoose.Schema({
   },
 	timeBalance: { type: Number, default: 24 },
 	id: { type: Number, default: Math.random() }
-});
+}); 
 
 var User = mongoose.model('User', UserSchema);
+*/
 
 // generate a hash and store in db with 10 salt rounds
 User.generateHash = function(password){
