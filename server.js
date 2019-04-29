@@ -191,14 +191,8 @@ app.route('/login')
         });
         User.findOne({'email': req.body.email, 'password': req.body.password}, (err, user) => {
             if (!user) {
-                //throw new Error('User does not exist');
-                var error = "User does not exist";
-                console.log(error);
-                //res.render('/login', { error: req.session.error });
-                //res.redirect('/login');
-                login.findError(error);
-                res.sendfile(__dirname + "/public/login.html");
-                //document.getElementById('errorname').innerHTML="this is an invalid name"; 
+                console.log("User does not exist");
+                res.sendFile(__dirname + "/public/loginfailure.html");
             }
             else {
 				bcrypt.compare(req.body.password, user.password, function (err, result) {
@@ -206,8 +200,10 @@ app.route('/login')
 						console.log('Correct password');
 						res.redirect('/feed_2');
 					} else {
-						res.send('Incorrect password');
-						res.redirect('/login');
+						console.log("User does not exist");
+						//res.send('Incorrect password');
+						res.sendFile(__dirname + "/public/loginfailure.html");
+						//res.redirect('/login');
 					}
 				});
                 console.log("FOUND");
