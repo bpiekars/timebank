@@ -48,15 +48,12 @@ var expressValidator = require('express-validator');
 var express = require('express');
 var server = express.Router();
 var bcrypt = require('bcryptjs');
-var login = require('./public/login.js');
-// use express validator for req.checkBody
 var app = express();
-app.use(expressValidator());
 
 var UserSchema = new mongoose.Schema({
   email: {
     type: String,
-    unique: true,
+    useCreateIndex: true,
     required: true,
     trim: true
   },
@@ -73,14 +70,17 @@ var UserSchema = new mongoose.Schema({
 
 var User = mongoose.model('User', UserSchema);
 
+// generate a hash and store in db with 10 salt rounds
 User.generateHash = function(password){
 	return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
 };
 
+// check if password is valid by loading hash from db and checking if entered password equals unhashed password
 User.prototype.validPassword = function(password){
 	return bcrypt.compareSync(password, this.localPassword);
 };
 
+// set application port to 8080
 app.set('port', 8080);
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -97,6 +97,7 @@ app.use(session({
         expires: 600000
     }
 }));
+
 
 app.use((req, res, next) => {
     if (req.cookies.user_sid && !req.session.user) {
@@ -115,6 +116,7 @@ var sessionChecker = (req, res, next) => {
     }
 };
 
+// route for the homepage
 app.get('/', sessionChecker, (req, res) => {
     res.redirect('/login');
 });
@@ -122,7 +124,6 @@ app.get('/', sessionChecker, (req, res) => {
 // Register a user
 app.route('/register')
     .get(sessionChecker, (req, res) => {
-        //res.sendfile(__dirname + '/public/register.html');
         res.sendFile(__dirname +'/public/register.html');
     })
     .post((req, res) => {
@@ -139,24 +140,11 @@ app.route('/register')
             }
         });
         console.log(req.body);
-		// Form Validator
-		req.checkBody('email','Email address is required').notEmpty();
-		req.checkBody('email','Email address is invalid').isEmail();
-		req.checkBody('firstname','First name field is required').notEmpty();
-		req.checkBody('lastname','Last name field is required').notEmpty();
-		req.checkBody('password','Password field is required').notEmpty();
-		req.checkBody('password_conf',"Passwords do not match").equals(req.body.password);
 		
 		var errors = req.validationErrors();
 		
 		if (errors) {
-			/*res.render('register.html', {
-				errors: errors
-			}); */
 			res.sendFile(__dirname + "/public/register.html", { errors: errors });
-			/*res.sendFile('./public/register.html', {
-				errors: errors
-			}); */
 		} else {
 		bcrypt.hash(req.body.password, 10, function(err, hash){
         var user = User.create({
