@@ -1,7 +1,9 @@
 var mongoose = require('mongoose');
+var schema = mongoose.Schema;
 
 class User {
-	var UserSchema = new mongoose.Schema({
+	constructor(){
+	this.UserSchema = new Schema({
   email: {
     type: String,
     useCreateIndex: true,
@@ -17,9 +19,7 @@ class User {
   },
 	timeBalance: { type: Number, default: 24 },
 	id: { type: Number }
-})
-	
-	var UserMod = mongoose.model('User', UserSchema);
 });
-
-module.exports = UserMod;
+	module.exports = mongoose.model('UserMod', UserSchema);
+}
+}

@@ -50,6 +50,7 @@ var server = express.Router();
 var bcrypt = require('bcryptjs');
 var app = express();
 var User = require('./models/User.js');
+var newUser = new UserMod();
 
 /*
 var UserSchema = new mongoose.Schema({
