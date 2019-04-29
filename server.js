@@ -1,30 +1,3 @@
-/*var express = require('express');
-var pug = require('pug');
-var path = require('path');
-var app = express();
-var bodyParser = require('body-parser');
-var methodOverride = require('method-override');
-//var mongoose = require('mongoose');
-
-//var db = require('./config/db');
-
-var port = process.env.PORT || 8080;
-var router = express.Router()
-
-app.use(express.static('public'));
-
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'public'))
-
-//server.js
-//mongoose.connect(db.url);
-
-/*app.get('/', function(req, res) {
-    res.render('log.html');
-}); */
-
-
-
 /*const handler = (req, res) => res.send(path.join(__dirname), 'public/index.html');
 const routes = ["/", "/login", "/register"];
 routes.forEach(route => app.get(route, handler));
@@ -32,14 +5,14 @@ routes.forEach(route => app.get(route, handler));
 /*app.get('/login', (req, res) => {
     res.sendfile(__dirname + '/public/login.html');
 })*/
-/*app.listen(port);
-
+/*
 var appl = angular.module('timebank', ['ngMaterial']);
 appl.controller('SidenavController', ($scope, $mdSidenav) => {
     $scope.openLeftMenu = () => {
         $mdSidenav('left').toggle();
     };
 });*/
+var path = require('path');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
@@ -48,9 +21,18 @@ var expressValidator = require('express-validator');
 var express = require('express');
 var server = express.Router();
 var bcrypt = require('bcryptjs');
-var app = express();
+//var pug = require('pug');
+//var methodOverride = require('method-override');
+//var db = require('./config/db');
 var User = require('./models/User.js');
-var newUser = new UserMod();
+//mongoose.connect(db.url);
+
+var app = express();
+app.use(expressValidator());
+/*
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'public'))
+*/
 
 /*
 var UserSchema = new mongoose.Schema({
@@ -69,10 +51,9 @@ var UserSchema = new mongoose.Schema({
   },
 	timeBalance: { type: Number, default: 24 },
 	id: { type: Number, default: Math.random() }
-}); 
+}); */
 
-var User = mongoose.model('User', UserSchema);
-*/
+//var User = mongoose.model('User', UserSchema);
 
 // generate a hash and store in db with 10 salt rounds
 User.generateHash = function(password){
@@ -80,10 +61,13 @@ User.generateHash = function(password){
 };
 
 // check if password is valid by loading hash from db and checking if entered password equals unhashed password
-User.prototype.validPassword = function(password){
-	return bcrypt.compareSync(password, this.localPassword);
+//User.prototype.validPassword = function(password){
+User.validPassword = function(password){
+	//return bcrypt.compareSync(password, this.localPassword);
+	return bcrypt.compareSync(password, req.body.Password);
 };
 
+//var port = process.env.PORT || 8080;
 // set application port to 8080
 app.set('port', 8080);
 
@@ -143,26 +127,52 @@ app.route('/register')
                 console.log("Connection status: " + mongoose.connection.readyState);
             }
         });
+		console.log('User input:');
         console.log(req.body);
 		
+		// Form Validator
+		req.checkBody('password_conf',"Passwords do not match").equals(req.body.password);
 		var errors = req.validationErrors();
 		
 		if (errors) {
-			res.sendFile(__dirname + "/public/register.html", { errors: errors });
+			console.log("Passwords do not match");
+			res.sendFile(__dirname + "/public/registerfailure.html");
 		} else {
 		bcrypt.hash(req.body.password, 10, function(err, hash){
-        var user = User.create({
-            email: req.body.email,
+		//var user = new User(req.body);
+		var userData = {
+			email: req.body.email,
             firstname: req.body.firstname,
             lastname: req.body.lastname,
             location: req.body.location,
             password: hash
-        });
-        req.session.user = user.dataValues;
-        res.redirect('/feed_2');
+		};
+		console.log('Saved to database:');
+		console.log(userData);
+        /* var user = User.create({
+			email: req.body.email,
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            location: req.body.location,
+            password: hash
+		}); */
+		User.create(userData, function(err, user) {
+			if (err) {
+				if (err.name === 'MongoError' && err.code === 11000) {
+				// Duplicate username
+				console.log('User already exists');
+				res.redirect('/registerfailure2.html');
+				}
+			}
+			else {
+				// if there's no error, redirect to feed dashboard
+				req.session.user = user.dataValues;
+				res.redirect('/feed_2');
+			}
+		});
 		});
 		}
-	});
+	})
 
 // Login a user
 app.route('/login')
