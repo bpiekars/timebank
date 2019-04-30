@@ -30,45 +30,6 @@ var Post = require('./models/Post.js');
 //var hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
 var app = express();
 app.use(expressValidator());
-/*
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'public'))
-*/
-
-/*
-var UserSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    useCreateIndex: true,
-    required: true,
-    trim: true
-  },
-	firstname: { type: String, required: true },
-	lastname: { type: String, required: true },
-	location: String,
-  password: {
-    type: String,
-    required: true
-  },
-	timeBalance: { type: Number, default: 24 },
-	id: { type: Number, default: Math.random() }
-}); */
-
-//var User = mongoose.model('User', UserSchema);
-
-// generate a hash and store in db with 10 salt rounds
-/* User.generateHash = function(password){
-	return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
-};
-
-// check if password is valid by loading hash from db and checking if entered password equals unhashed password
-//User.prototype.validPassword = function(password){
-User.prototype.validPassword = function(password){
-	//return bcrypt.compareSync(password, this.localPassword);
-	return bcrypt.compareSync(password, req.body.Password);
-}; */
-
-//var port = process.env.PORT || 8080;
 // set application port to 8080
 app.set('port', 8080);
 
@@ -214,14 +175,16 @@ app.route('/login')
             } */
         });
     });
-	
+
+// Make a post and save to database
 app.route('/post')
     .get(sessionChecker, (req, res) => {
-        res.sendFile(__dirname + '/public/feed_2.html');
+        res.sendFile(__dirname +'/public/feed2_success.html');
     })
-	.post((req, res) => {
+    .post((req, res) => {
         var url = 'mongodb://localhost:27017/timebank';
-        var db = mongoose.connect(url, { useNewUrlParser: true }, function(err, db) {
+
+        var db = mongoose.connect(url, { useNewUrlParser: true, useCreateIndex: true }, function(err, db) {
             if(err){
                 console.log(err);
             }
@@ -231,27 +194,27 @@ app.route('/post')
                 console.log("Connection status: " + mongoose.connection.readyState);
             }
         });
-		console.log('User input:');
+		console.log('Post text:');
         console.log(req.body);
-		var postBody = {
+		
+		var postData = {
 			message: req.body.message
 		};
 		console.log('Saved to database:');
-		console.log(postBody);
-		Post.create(postBody, function(err, user) {
+		console.log(postData);
+		Post.create(postData, function(err, user) {
 			if (err) {
-				// if there's an error, redirect to dashboard
-				console.log('Message failed to post');
-				req.session.user = user.dataValues;
-				res.redirect('/feed_2');
+				console.log('Post unsuccessful');
+				res.redirect('/feed_2.html');
 			}
 			else {
-				// if there's no error, tell user post submitted and update feed
-				console.log('Message successfully posted');
-				res.redirect('/feed_2success');
-			}
-		});
-	});
+				// if there's no error, redirect to feed dashboard
+				console.log('Post successful');
+				res.redirect('/feed_2_success.html');
+      }
+    });
+    });
+
 // Route to homepage
 app.get('/feed_2', (req, res) => {
     if (req.session.user && req.cookies.user_sid) {
@@ -274,7 +237,6 @@ app.get('/logout', (req, res) => {
       } else {
 		res.clearCookie('user_sid');
 		console.log('User logged out');
-        return res.redirect('/logout.html');
 		res.sendFile(__dirname + "/public/logout.html");
       }
     });
