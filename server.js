@@ -27,7 +27,7 @@ var bcrypt = require('bcryptjs');
 var User = require('./models/User.js');
 var Post = require('./models/Post.js');
 //mongoose.connect(db.url);
-
+//var hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
 var app = express();
 app.use(expressValidator());
 /*
@@ -131,8 +131,8 @@ app.route('/register')
         console.log(req.body);
 		
 		// Form Validator
-		//req.checkBody('password_conf',"Passwords do not match").equals(req.body.password);
-		//var errors = req.validationErrors();
+		req.checkBody('password_conf',"Passwords do not match").equals(req.body.password);
+		var errors = req.validationErrors();
 		
 		if (errors) {
 			console.log("Passwords do not match");
@@ -183,14 +183,19 @@ app.route('/login')
                 console.log("Connection status: " + mongoose.connection.readyState);
             }
         });
-        //User.findOne({'email': req.body.email, 'password': req.body.password}, (err, user) => {
-			User.findOne({'email': req.body.email}, (err, user) => {
-            if (!user) {
+        User.findOne({'email': req.body.email, 'password': req.body.password}, (err, user) => {
+            if (err) {
                 console.log("User does not exist");
                 res.sendFile(__dirname + "/public/loginfailure.html");
             }
             else {
-				bcrypt.compare(User.password, hash, function (err, result) {
+				bcrypt.hash(req.body.password, 10, function(err, hash){
+					var userData = {
+						email: req.body.email,
+						password: hash
+					};
+				});
+				bcrypt.compareHashSync(req.body.password, hash, function (err, result) {
 					if (result) {
 						console.log('Correct password');
 						res.redirect('/feed_2');
@@ -257,6 +262,23 @@ app.get('/feed_2', (req, res) => {
     else {
         res.sendFile(__dirname + "/public/feed_2.html");
     }
+});
+
+// GET /logout
+app.get('/logout', (req, res) => {
+  if (req.session) {
+    // delete session object
+    req.session.destroy(function(err) {
+      if(err) {
+        return next(err);
+      } else {
+		res.clearCookie('user_sid');
+		console.log('User logged out');
+        return res.redirect('/logout.html');
+		res.sendFile(__dirname + "/public/logout.html");
+      }
+    });
+  }
 });
 
 app.use(function (req, res, next) {
