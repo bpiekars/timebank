@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var bcrypt = require('bcryptjs');
 
 //class UserC {
 	//constructor(){
@@ -20,6 +21,16 @@ var UserSchema = new mongoose.Schema({
 	timeBalance: { type: Number, default: 24 },
 	id: { type: Number }
 });
+
+UserSchema.methods.generateHash = function (password){
+	return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
+};
+
+// check if password is valid by loading hash from db and checking if entered password equals unhashed password
+UserSchema.methods.validPassword = function (password){
+	//return bcrypt.compareSync(password, this.localPassword);
+	return bcrypt.compareSync(password, this.password);
+};
 
 module.exports = mongoose.model('User', UserSchema);
 //var UserMod = mongoose.model('UserMod', UserSchema);

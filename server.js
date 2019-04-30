@@ -25,6 +25,7 @@ var bcrypt = require('bcryptjs');
 //var methodOverride = require('method-override');
 //var db = require('./config/db');
 var User = require('./models/User.js');
+var Post = require('./models/Post.js');
 //mongoose.connect(db.url);
 
 var app = express();
@@ -56,16 +57,16 @@ var UserSchema = new mongoose.Schema({
 //var User = mongoose.model('User', UserSchema);
 
 // generate a hash and store in db with 10 salt rounds
-User.generateHash = function(password){
+/* User.generateHash = function(password){
 	return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
 };
 
 // check if password is valid by loading hash from db and checking if entered password equals unhashed password
 //User.prototype.validPassword = function(password){
-User.validPassword = function(password){
+User.prototype.validPassword = function(password){
 	//return bcrypt.compareSync(password, this.localPassword);
 	return bcrypt.compareSync(password, req.body.Password);
-};
+}; */
 
 //var port = process.env.PORT || 8080;
 // set application port to 8080
@@ -85,7 +86,6 @@ app.use(session({
         expires: 600000
     }
 }));
-
 
 app.use((req, res, next) => {
     if (req.cookies.user_sid && !req.session.user) {
@@ -131,31 +131,23 @@ app.route('/register')
         console.log(req.body);
 		
 		// Form Validator
-		req.checkBody('password_conf',"Passwords do not match").equals(req.body.password);
-		var errors = req.validationErrors();
+		//req.checkBody('password_conf',"Passwords do not match").equals(req.body.password);
+		//var errors = req.validationErrors();
 		
 		if (errors) {
 			console.log("Passwords do not match");
 			res.sendFile(__dirname + "/public/registerfailure.html");
 		} else {
 		bcrypt.hash(req.body.password, 10, function(err, hash){
-		//var user = new User(req.body);
 		var userData = {
 			email: req.body.email,
             firstname: req.body.firstname,
             lastname: req.body.lastname,
             location: req.body.location,
-            password: hash
+			password: hash
 		};
 		console.log('Saved to database:');
 		console.log(userData);
-        /* var user = User.create({
-			email: req.body.email,
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            location: req.body.location,
-            password: hash
-		}); */
 		User.create(userData, function(err, user) {
 			if (err) {
 				if (err.name === 'MongoError' && err.code === 11000) {
@@ -172,7 +164,7 @@ app.route('/register')
 		});
 		});
 		}
-	})
+	});
 
 // Login a user
 app.route('/login')
@@ -191,21 +183,20 @@ app.route('/login')
                 console.log("Connection status: " + mongoose.connection.readyState);
             }
         });
-        User.findOne({'email': req.body.email, 'password': req.body.password}, (err, user) => {
+        //User.findOne({'email': req.body.email, 'password': req.body.password}, (err, user) => {
+			User.findOne({'email': req.body.email}, (err, user) => {
             if (!user) {
                 console.log("User does not exist");
                 res.sendFile(__dirname + "/public/loginfailure.html");
             }
             else {
-				bcrypt.compare(req.body.password, user.password, function (err, result) {
-					if (result == true) {
+				bcrypt.compare(User.password, hash, function (err, result) {
+					if (result) {
 						console.log('Correct password');
 						res.redirect('/feed_2');
 					} else {
-						console.log("User does not exist");
-						//res.send('Incorrect password');
+						console.log("Incorrect password");
 						res.sendFile(__dirname + "/public/loginfailure.html");
-						//res.redirect('/login');
 					}
 				});
                 console.log("FOUND");
@@ -218,6 +209,44 @@ app.route('/login')
             } */
         });
     });
+	
+app.route('/post')
+    .get(sessionChecker, (req, res) => {
+        res.sendFile(__dirname + '/public/feed_2.html');
+    })
+	.post((req, res) => {
+        var url = 'mongodb://localhost:27017/timebank';
+        var db = mongoose.connect(url, { useNewUrlParser: true }, function(err, db) {
+            if(err){
+                console.log(err);
+            }
+            else {
+                console.log("MongoDB connection successfully established to url: " + url);
+                mongoose.connection.close();
+                console.log("Connection status: " + mongoose.connection.readyState);
+            }
+        });
+		console.log('User input:');
+        console.log(req.body);
+		var postBody = {
+			message: req.body.message
+		};
+		console.log('Saved to database:');
+		console.log(postBody);
+		Post.create(postBody, function(err, user) {
+			if (err) {
+				// if there's an error, redirect to dashboard
+				console.log('Message failed to post');
+				req.session.user = user.dataValues;
+				res.redirect('/feed_2');
+			}
+			else {
+				// if there's no error, tell user post submitted and update feed
+				console.log('Message successfully posted');
+				res.redirect('/feed_2success');
+			}
+		});
+	});
 // Route to homepage
 app.get('/feed_2', (req, res) => {
     if (req.session.user && req.cookies.user_sid) {
