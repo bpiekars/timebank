@@ -1,4 +1,5 @@
 # Timebank App
+A web-based HTML application for a service where people can sell service for hours of time.
 # Installation
 1. Install Node.js and MongoDB.
 2. Run MongoDB in a terminal window
