@@ -1,9 +1,7 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcryptjs');
 
-//class UserC {
-	//constructor(){
-	//this.UserSchema = new mongoose.Schema({
+// Database schema for a user
 var UserSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -22,19 +20,19 @@ var UserSchema = new mongoose.Schema({
 	id: { type: Number }
 });
 
+// Generate salt and hash for password
 UserSchema.methods.generateHash = function (password){
 	return bcrypt.hashSync(password, bcrypt.genSaltSync(10), null);
 };
 
-// check if password is valid by loading hash from db and checking if entered password equals unhashed password
-UserSchema.methods.validPassword = function (password){
-	//return bcrypt.compareSync(password, this.localPassword);
+// Check if password is valid by loading hash from db and checking if entered password equals unhashed password
+UserSchema.methods.comparePassword = function(password){
 	return bcrypt.compareSync(password, this.password);
-};
+}
 
+/* UserSchema.methods.comparePassword = function(plaintext, callback) {
+    return callback(null, bcrypt.compare(plaintext, this.password));
+}; */
+
+// Export User database model
 module.exports = mongoose.model('User', UserSchema);
-//var UserMod = mongoose.model('UserMod', UserSchema);
-//module.exports.UserMod = UserMod;
-//module.exports.User = mongoose.model('UserMod', UserSchema);
-//}
-//}
