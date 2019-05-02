@@ -9,8 +9,6 @@ var server = express.Router();
 var bcrypt = require('bcryptjs');
 var User = require('./models/User.js');
 var Post = require('./models/Post.js');
-//var pug = require('pug');
-//var db = require('./config/db');
 
 // Initialize express app
 var app = express();
@@ -64,6 +62,7 @@ var sessionChecker = (req, res, next) => {
 app.get('/', sessionChecker, (req, res) => {
     res.redirect('/login');
 });
+
 // Route handling to register a user
 app.route('/register')
     .get(sessionChecker, (req, res) => {
@@ -99,34 +98,49 @@ app.route('/register')
             console.log("Passwords do not match");
             res.sendFile(__dirname + "/public/registerfailure.html");
         } else {
-            // Salt and hash the user's password with 10 salt rounds
-            var userData = {
-                email: req.body.email,
-                firstname: req.body.firstname,
-                lastname: req.body.lastname,
-                location: req.body.location,
-                password: req.body.password // password: hash // will store password as hash, currently plaintext
-            };
-            // Log user data as will be saved to database
-            console.log('Saved to database:');
-            console.log(userData);
-
-            // Create a user document and save it to the database
-            User.create(userData, function(err, user) {
-                // if MongoDB sends error 11000 that means duplicate entry found, throw an error
-                if (err) {
-                    if (err.name === 'MongoError' && err.code === 11000) {
-                        console.log('User already exists'); // Duplicate email found
-                        res.redirect('/registerfailure2.html'); // Tell user that email already found, redirect to registry
+            bcrypt.hash(req.body.password, 10, function(err, hash) {
+                var user = User.create({
+                    email: req.body.email,
+                    firstname: req.body.firstname,
+                    lastname: req.body.lastname,
+                    location: req.body.location,
+                    password: hash
+                }, function(err, user) {
+                    if (err) {
+                        if (err.name === 'MongoError' && err.code === 11000) {
+                            console.log('User already exists'); // Duplicate email found
+                            res.redirect('/registerfailure2.html'); // Tell user that email already found, redirect to registry
+                        }
+                    } else {
+                        // if there's no error, redirect to feed dashboard
+                        // Log user data as will be saved to database
+                        console.log('Saved to database:');
+                        console.log(user);
+                        req.session.user = user.dataValues; // initialize the current session for the current user with the entered values
+                        res.redirect('/feed_2');
                     }
-                } else {
-                    // if there's no error, redirect to feed dashboard
-                    req.session.user = user.dataValues; // initialize the current session for the current user with the entered values
-                    res.redirect('/feed_2');
-                }
+                });
             });
         }
     });
+
+/*// Create a user document and save it to the database
+User.create(userData, function(err, user) {
+    // if MongoDB sends error 11000 that means duplicate entry found, throw an error
+    if (err) {
+        if (err.name === 'MongoError' && err.code === 11000) {
+            console.log('User already exists'); // Duplicate email found
+            res.redirect('/registerfailure2.html'); // Tell user that email already found, redirect to registry
+        }
+    } else {
+        // if there's no error, redirect to feed dashboard
+        req.session.user = user.dataValues; // initialize the current session for the current user with the entered values
+        res.redirect('/feed_2');
+    }
+}); */
+/*  });
+        }
+    }); */
 // Route handling to login a user
 app.route('/login')
     .get(sessionChecker, (req, res) => {
@@ -155,37 +169,49 @@ app.route('/login')
         // Query database to find a document that contains both user input email and password
         User.findOne({
             'email': req.body.email,
-            'password': req.body.password
         }, (err, user) => {
             // If an error occurs, user with email and password not found
             if (err) {
+                console.log(err);
+            }
+            if (!user) {
                 console.log("User does not exist");
                 res.sendFile(__dirname + "/public/loginfailure.html"); // inform user that user was not found in database
             } else {
                 //var hash = user.generateHash(password);
-                var userData = {
+                /* var userData = {
                     email: req.body.email,
                     password: req.body.password // hash // save hashed password as password in database
-                };
+                }; */
                 // Salt and hash the password
                 //bcrypt.hash(req.body.password, 10, function(err, hash){
                 //});
                 // Check if input password equals hash password stored in database
-                bcrypt.compare(req.body.password, User.password, function(err, result) {
+                bcrypt.hash(req.body.password, 10, function(err, hash) {
+                    if (err) {
+                        throw (err);
+                    }
+                });
+
+                bcrypt.compare(req.body.password, user.password, function(err, result) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    console.log(result);
                     // If result is true, the passwords match
                     if (result) {
+                        // If no error found and passwords match, then user is found
                         console.log('Correct password');
-                        res.redirect('/feed_2'); // redirect to feed
+                        //res.redirect('/feed_2'); // redirect to feed
+                        console.log(user);
+                        console.log("FOUND");
+                        req.session.user = user.dataValues; // create session for user using input vales
+                        res.redirect('/feed_2'); // redirect user to the feed
                     } else {
                         console.log("Incorrect password"); // If result is false, passwords do not match
                         res.sendFile(__dirname + "/public/loginfailure.html"); // Redirect to login failure page
                     }
                 });
-                // If no error found and passwords match, then user is found
-                console.log(userData);
-                console.log("FOUND");
-                req.session.user = user.dataValues; // create session for user using input vales
-                res.redirect('/feed_2'); // redirect user to the feed
             }
         });
     });
@@ -223,7 +249,7 @@ app.route('/post')
         console.log('Saved to database:');
         console.log(postData);
         // Create Post document using input text as post data
-        Post.create(postData, function(err, user) {
+        Post.create(postData, function(err) {
             if (err) {
                 // If an error posting occurs, log to console and redirect back to feed page
                 console.log('Post unsuccessful');

@@ -11,21 +11,21 @@
 </head>
 <body>
 <div class="main">
-    <form method="post" action="/register">
-        <p class="title">
-            Timebank
-        </p>
-        <p class="subtitle">
-            Register
-        </p>
+    <form method="post" action="/register">		
 		<p class="logo">
-			<a href="/register">
-            <img src="https://i.ibb.co/XS0Swy3/2cee4bf8-ac31-4c3c-89c7-f62f360ae00f.png" alt="Timebank" style="width:200px;height:200px;">
-			</a>
+		<a href="/register">
+			<img src="https://i.ibb.co/XS0Swy3/2cee4bf8-ac31-4c3c-89c7-f62f360ae00f.png" alt="Timebank" style="width:200px;height:200px;">
+		</a>
+        </p>
+        <p class="title">
+            Register
         </p>
 		<div class="alert alert-danger" role="alert">
 		User with associated email address already exists
 		</div>
+		<script>
+		toastr.error('User with associated email address already exists')
+		</script>
         <div class="form-group">
             <input type="text" class="form-control" placeholder="Email address" value="" name="email" required/>
         </div>
@@ -38,9 +38,6 @@
         <div class="form-group">
             <input type="text" class="form-control" placeholder="Location (optional)" value="" name="location"/>
         </div>
-		<script>
-			toastr.error('User with associated email address already exists')
-		</script>
         <div class="form-group">
             <input type="password" class="form-control" placeholder="Password" value="" name="password" required/>
         </div>
