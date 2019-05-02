@@ -241,9 +241,9 @@ app.get('/feed_2', (req, res) => {
         res.clearCookie('user_sid');
         // redirect to feed anyway
         res.sendFile(__dirname + "/public/feed_2.html");
-    } else {
+    } /* else {
         console.log('Error: no user session found. Please login again');
-        res.sendFile(__dirname + "/public/loginfailure2.html");
+        res.sendFile(__dirname + "/public/loginfailure2.html"); */
     }
 });
 // GET route for HTTP logout request
