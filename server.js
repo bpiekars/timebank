@@ -124,23 +124,6 @@ app.route('/register')
         }
     });
 
-/*// Create a user document and save it to the database
-User.create(userData, function(err, user) {
-    // if MongoDB sends error 11000 that means duplicate entry found, throw an error
-    if (err) {
-        if (err.name === 'MongoError' && err.code === 11000) {
-            console.log('User already exists'); // Duplicate email found
-            res.redirect('/registerfailure2.html'); // Tell user that email already found, redirect to registry
-        }
-    } else {
-        // if there's no error, redirect to feed dashboard
-        req.session.user = user.dataValues; // initialize the current session for the current user with the entered values
-        res.redirect('/feed_2');
-    }
-}); */
-/*  });
-        }
-    }); */
 // Route handling to login a user
 app.route('/login')
     .get(sessionChecker, (req, res) => {
@@ -178,21 +161,12 @@ app.route('/login')
                 console.log("User does not exist");
                 res.sendFile(__dirname + "/public/loginfailure.html"); // inform user that user was not found in database
             } else {
-                //var hash = user.generateHash(password);
-                /* var userData = {
-                    email: req.body.email,
-                    password: req.body.password // hash // save hashed password as password in database
-                }; */
-                // Salt and hash the password
-                //bcrypt.hash(req.body.password, 10, function(err, hash){
-                //});
-                // Check if input password equals hash password stored in database
                 bcrypt.hash(req.body.password, 10, function(err, hash) {
                     if (err) {
-                        throw (err);
+                        console.log(err);
+                        res.redirect('/loginfailure'); // Redirect user to the login failure page
                     }
                 });
-
                 bcrypt.compare(req.body.password, user.password, function(err, result) {
                     if (err) {
                         console.log(err);
@@ -202,14 +176,13 @@ app.route('/login')
                     if (result) {
                         // If no error found and passwords match, then user is found
                         console.log('Correct password');
-                        //res.redirect('/feed_2'); // redirect to feed
                         console.log(user);
                         console.log("FOUND");
                         req.session.user = user.dataValues; // create session for user using input vales
                         res.redirect('/feed_2'); // redirect user to the feed
                     } else {
                         console.log("Incorrect password"); // If result is false, passwords do not match
-                        res.sendFile(__dirname + "/public/loginfailure.html"); // Redirect to login failure page
+                        res.sendFile(__dirname + "/public/loginfailure.html"); // Redirect user to login failure page
                     }
                 });
             }
@@ -261,19 +234,18 @@ app.route('/post')
             }
         });
     });
-
 // GET route to feed
 app.get('/feed_2', (req, res) => {
     if (req.session.user && req.cookies.user_sid) {
         // if existing user session and cookies found, clear them and redirect to feed
         res.clearCookie('user_sid');
-        res.redirect('/feed_2.html');
-    } else {
         // redirect to feed anyway
         res.sendFile(__dirname + "/public/feed_2.html");
+    } else {
+        console.log('Error: no user session found. Please login again');
+        res.sendFile(__dirname + "/public/loginfailure2.html");
     }
 });
-
 // GET route for HTTP logout request
 app.get('/logout', (req, res) => {
     if (req.session) {
@@ -283,17 +255,16 @@ app.get('/logout', (req, res) => {
                 return next(err);
             } else {
                 res.clearCookie('user_sid'); // clear cookies for current user session
-                console.log('User logged out');
+                console.log('Session cookies cleared.');
+                console.log('User logged out.');
                 res.sendFile(__dirname + "/public/logout.html"); // redirect to login page, informing user they've been signed out
             }
         });
     }
 });
-
 // handler for HTTP 404 error: page not found
 app.use(function(req, res, next) {
     res.status(404).send("Page unavailable");
 });
-
 // app starts listening for connections on port 8080
 app.listen(app.get('port'), () => console.log('App started'));

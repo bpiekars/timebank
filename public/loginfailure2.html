@@ -20,9 +20,11 @@
             Login
         </p>
 		<div class="alert alert-danger" role="alert">
-		You have been signed out.
+		Please try logging in again.
 		</div>
-		<script>toastr.warning('You have been signed out');</script>
+		<script>
+		toastr.warning('User session could not be created.');
+		</script>
         <div class="form-group">
             <input type="email" id="emailid" class="form-control" name = "email" placeholder="Email address" value="" required/>
         </div>
