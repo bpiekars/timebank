@@ -1,12 +1,12 @@
-var path = require('path');
-var stream = require('getstream-node');
+//var path = require('path');
+//var stream = require('getstream-node');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var mongoose = require('mongoose');
 var expressValidator = require('express-validator');
 var express = require('express');
-var server = express.Router();
+//var server = express.Router();
 var bcrypt = require('bcryptjs');
 var User = require('./models/User.js');
 var Post = require('./models/Post.js');
@@ -29,27 +29,18 @@ app.use(bodyParser.urlencoded({
 app.use(express.static(__dirname + '/public'));
 
 // Parse and store browser cookies to handle user sessions
-app.use(cookieParser('secret'));
+app.use(cookieParser());
 
 // Initialize express session with key, secret, only creates session for users who login or register, cookies automatically expire 
 app.use(session({
     key: 'user_sid', // session key
     secret: 'secret', // session secret string
-	resave: false,
+    resave: false,
     saveUninitialized: false, // only create session for users who login or register
     cookie: {
         expires: 600000 // set cookies to automatically expire 
     },
-	 path:"/*" //NEEDED
 }));
-
-// Check if user cookies are still stored in browser while user not set, if so automatically logs the user out.
-app.use((req, res, next) => {
-    if (req.cookies.user_sid && !req.session.user) {
-        res.clearCookie('user_sid');
-    }
-    next();
-});
 
 // Check if user is logged in
 var sessionChecker = (req, res, next) => {
@@ -59,6 +50,14 @@ var sessionChecker = (req, res, next) => {
         next();
     }
 };
+
+// Check if user cookies are still stored in browser while user not set, if so automatically logs the user out.
+app.use((req, res, next) => {
+    if (req.cookies.user_sid && !req.session.user) {
+        res.clearCookie('user_sid');
+    }
+    next();
+});
 
 // Route index to login page
 app.get('/', sessionChecker, (req, res) => {
@@ -114,11 +113,11 @@ app.route('/register')
                             res.redirect('/registerfailure2.html'); // Tell user that email already found, redirect to registry
                         }
                     } else {
-                        // if there's no error, redirect to feed dashboard
                         // Log user data as will be saved to database
                         console.log('Saved to database:');
                         console.log(user);
-                        req.session.user = user.dataValues; // initialize the current session for the current user with the entered values
+                        //req.sessioncookie.user = user;
+                        //.session.user = user.dataValues; // initialize the current session for the current user with the entered values
                         res.redirect('/feed_2');
                     }
                 });
@@ -218,8 +217,9 @@ app.route('/post')
 
         // Set post data to input text
         var postData = {
-			user: req.session.user,
-            message: req.body.message
+            message: req.body.message,
+            posted: new Date(),
+            author: req.body.email
         };
         // Log data to be saved to database to console
         console.log('Saved to database:');
@@ -239,19 +239,15 @@ app.route('/post')
     });
 // GET route to feed
 app.get('/feed_2', (req, res) => {
-    if (req.session.user && req.cookies.user_sid) {
+    if (req.session.user && req.cookies.key) {
         // if existing user session and cookies found, clear them and redirect to feed
         res.clearCookie('user_sid');
         // redirect to feed anyway
         res.sendFile(__dirname + "/public/feed_2.html");
     } else {
-		// redirect to feed anyway
+        // redirect to feed anyway
         res.sendFile(__dirname + "/public/feed_2.html");
-	}
-	/* else {
-        console.log('Error: no user session found. Please login again');
-        res.sendFile(__dirname + "/public/loginfailure2.html");
-    } */
+    }
 });
 // GET route for HTTP logout request
 app.get('/logout', (req, res) => {
