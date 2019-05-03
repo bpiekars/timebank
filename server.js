@@ -243,8 +243,8 @@ app.get('/feed_2', (req, res) => {
         res.sendFile(__dirname + "/public/feed_2.html");
     } /* else {
         console.log('Error: no user session found. Please login again');
-        res.sendFile(__dirname + "/public/loginfailure2.html"); */
-    }
+        res.sendFile(__dirname + "/public/loginfailure2.html");
+    } */
 });
 // GET route for HTTP logout request
 app.get('/logout', (req, res) => {
