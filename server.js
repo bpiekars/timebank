@@ -230,7 +230,7 @@ app.route('/post')
             } else {
                 // If no error occurs, log success to console and redirect back to feed page (with new post added to top of feed)
                 console.log('Post successful');
-                res.redirect('/feed_2_success.html');
+                res.redirect('/feed_2success.html');
             }
         });
     });
@@ -241,7 +241,11 @@ app.get('/feed_2', (req, res) => {
         res.clearCookie('user_sid');
         // redirect to feed anyway
         res.sendFile(__dirname + "/public/feed_2.html");
-    } /* else {
+    } else {
+		// redirect to feed anyway
+        res.sendFile(__dirname + "/public/feed_2.html");
+	}
+	/* else {
         console.log('Error: no user session found. Please login again');
         res.sendFile(__dirname + "/public/loginfailure2.html");
     } */
