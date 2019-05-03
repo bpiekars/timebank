@@ -1,12 +1,9 @@
-//var path = require('path');
-//var stream = require('getstream-node');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var mongoose = require('mongoose');
 var expressValidator = require('express-validator');
 var express = require('express');
-//var server = express.Router();
 var bcrypt = require('bcryptjs');
 var User = require('./models/User.js');
 var Post = require('./models/Post.js');
@@ -116,8 +113,7 @@ app.route('/register')
                         // Log user data as will be saved to database
                         console.log('Saved to database:');
                         console.log(user);
-                        //req.sessioncookie.user = user;
-                        //.session.user = user.dataValues; // initialize the current session for the current user with the entered values
+                        req.session.user = user.dataValues; // initialize the current session for the current user with the entered values
                         res.redirect('/feed_2');
                     }
                 });
@@ -165,7 +161,8 @@ app.route('/login')
                 bcrypt.hash(req.body.password, 10, function(err, hash) {
                     if (err) {
                         console.log(err);
-                        res.redirect('/loginfailure'); // Redirect user to the login failure page
+						res.sendFile(__dirname + "/public/loginfailure.html"); 
+                        //res.redirect('/loginfailure'); // Redirect user to the login failure page
                     }
                 });
                 bcrypt.compare(req.body.password, user.password, function(err, result) {
@@ -229,11 +226,11 @@ app.route('/post')
             if (err) {
                 // If an error posting occurs, log to console and redirect back to feed page
                 console.log('Post unsuccessful');
-                res.redirect('/feed_2.html');
+				res.sendFile(__dirname + "/public/feed_2.html");
             } else {
                 // If no error occurs, log success to console and redirect back to feed page (with new post added to top of feed)
                 console.log('Post successful');
-                res.redirect('/feed_2success.html');
+				res.sendFile(__dirname + "/public/feed_2success.html");
             }
         });
     });
@@ -242,7 +239,6 @@ app.get('/feed_2', (req, res) => {
     if (req.session.user && req.cookies.key) {
         // if existing user session and cookies found, clear them and redirect to feed
         res.clearCookie('user_sid');
-        // redirect to feed anyway
         res.sendFile(__dirname + "/public/feed_2.html");
     } else {
         // redirect to feed anyway
