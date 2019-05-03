@@ -1,3 +1,6 @@
 .row {
     padding-top: 1rem;
 }
+.form-control {
+    width: 800px;
+}

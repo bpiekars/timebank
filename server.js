@@ -1,4 +1,5 @@
 var path = require('path');
+var stream = require('getstream-node');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
@@ -216,6 +217,7 @@ app.route('/post')
 
         // Set post data to input text
         var postData = {
+            user: req.session.user,
             message: req.body.message
         };
         // Log data to be saved to database to console
