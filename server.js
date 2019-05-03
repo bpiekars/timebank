@@ -33,9 +33,10 @@ app.use(cookieParser());
 
 // Initialize express session with key, secret, only creates session for users who login or register, cookies automatically expire 
 app.use(session({
+	path: '/',
     key: 'user_sid', // session key
     secret: 'secret', // session secret string
-    resave: false,
+    resave: true,
     saveUninitialized: false, // only create session for users who login or register
     cookie: {
         expires: 600000 // set cookies to automatically expire 
@@ -217,7 +218,8 @@ app.route('/post')
 
         // Set post data to input text
         var postData = {
-            user: req.session.user,
+            //user: req.session.user,
+			user: User.email,
             message: req.body.message
         };
         // Log data to be saved to database to console
