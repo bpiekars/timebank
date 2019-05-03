@@ -29,18 +29,18 @@ app.use(bodyParser.urlencoded({
 app.use(express.static(__dirname + '/public'));
 
 // Parse and store browser cookies to handle user sessions
-app.use(cookieParser());
+app.use(cookieParser('secret'));
 
 // Initialize express session with key, secret, only creates session for users who login or register, cookies automatically expire 
 app.use(session({
-	path: '/',
     key: 'user_sid', // session key
     secret: 'secret', // session secret string
-    resave: true,
+	resave: false,
     saveUninitialized: false, // only create session for users who login or register
     cookie: {
         expires: 600000 // set cookies to automatically expire 
-    }
+    },
+	 path:"/*" //NEEDED
 }));
 
 // Check if user cookies are still stored in browser while user not set, if so automatically logs the user out.
@@ -118,7 +118,8 @@ app.route('/register')
                         // Log user data as will be saved to database
                         console.log('Saved to database:');
                         console.log(user);
-                        req.session.user = user.dataValues; // initialize the current session for the current user with the entered values
+						req.sessioncookie.user = user;
+                        //req.session.user = user.dataValues; // initialize the current session for the current user with the entered values
                         res.redirect('/feed_2');
                     }
                 });
@@ -218,8 +219,7 @@ app.route('/post')
 
         // Set post data to input text
         var postData = {
-            //user: req.session.user,
-			user: User.email,
+			user: req.session.user,
             message: req.body.message
         };
         // Log data to be saved to database to console
