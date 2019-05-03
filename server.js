@@ -161,8 +161,7 @@ app.route('/login')
                 bcrypt.hash(req.body.password, 10, function(err, hash) {
                     if (err) {
                         console.log(err);
-						res.sendFile(__dirname + "/public/loginfailure.html"); 
-                        //res.redirect('/loginfailure'); // Redirect user to the login failure page
+						res.sendFile(__dirname + "/public/loginfailure.html");
                     }
                 });
                 bcrypt.compare(req.body.password, user.password, function(err, result) {
