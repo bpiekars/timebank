@@ -118,8 +118,7 @@ app.route('/register')
                         // Log user data as will be saved to database
                         console.log('Saved to database:');
                         console.log(user);
-						req.sessioncookie.user = user;
-                        //req.session.user = user.dataValues; // initialize the current session for the current user with the entered values
+                        req.session.user = user.dataValues; // initialize the current session for the current user with the entered values
                         res.redirect('/feed_2');
                     }
                 });
