@@ -14,11 +14,28 @@ var Post = require('./models/Post.js');
 // Initialize express app
 var app = express();
 
+let FeedManager = stream.FeedManager;
+
+
 // Express middleware for validation and req.body error checking
 app.use(expressValidator());
 
 // Set application port to 8080
 app.set('port', 8080);
+
+var PostS = new mongoose.Schema({
+	name: String,
+	text: String, // Text body of post
+	time: { type : Date, default: Date.now } // Log date posted
+});
+
+var PostM = mongoose.model('PostM', PostS);
+
+
+
+//postSchema.plugin(stream.mongoose.activity);
+
+stream.mongoose.setupMongoose(mongoose);
 
 // Tell express to parse user input as req.body
 app.use(bodyParser.urlencoded({
@@ -216,15 +233,19 @@ app.route('/post')
         console.log(req.body);
 
         // Set post data to input text
-        var postData = {
-            user: req.session.user,
-            message: req.body.message
-        };
-        // Log data to be saved to database to console
-        console.log('Saved to database:');
-        console.log(postData);
+        /*var postData = {
+            user: "a",
+            message: "l"
+            //message: req.body.message
+        }; */
+        // Log data to be saved to database to console\
+        //console.log(postData);
+        var postData = new PostM({
+            name: "user",
+            text: req.body.message
+        });
         // Create Post document using input text as post data
-        Post.create(postData, function(err) {
+        PostM.create(postData, function(err) {
             if (err) {
                 // If an error posting occurs, log to console and redirect back to feed page
                 console.log('Post unsuccessful');
@@ -268,6 +289,92 @@ app.get('/logout', (req, res) => {
         });
     }
 });
+function ensureAuthenticated(req, res, next) {
+    return next();
+  }
+
+
+app.get('/flat', ensureAuthenticated, function(req, res, next){
+    req.user.id = "1";
+    var flatFeed = FeedManager.getNewsFeeds(req.user.id)['flat'];
+ 
+    flatFeed.get({})
+    	.then(function (body) {
+        	var activities = body.results;
+        	return StreamBackend.enrichActivities(activities);
+        })
+        .then(function (enrichedActivities) {
+            return res.render('feed', {location: 'feed', user: req.user, activities: enrichedActivities, path: req.url});
+        })
+        .catch(next)
+    });
+
+/*
+app.controller("MainController", function($scope) {
+    //console.log('help');
+    $scope.product = "dddddddddd";
+    //var url = "mongodb://localhost:27017/timebank";
+    //var db = mongoose.connect(url, {useNewUrlParser: true});
+    //var Post = mongoose.model('Post', {
+        //email: String,
+        //text: String
+    //});
+    var strings = ["I posted this", "I posted that", "I posted another thing."]
+    var finalHTML = "";
+    for (x in strings) {
+        //finalHTML += "<div class='row'><div class='col-md-3'><div class='card'><div class='card-body'><div class='h5'>" + "use!" + "</div><div class='h7 text-muted'>"+ x + "</div></div></div></div>";
+        //finalHTML += "<div>hello!!</div>";
+    }
+    /*Post.find({}, (err, posts) => {
+        if (err) {
+            console.log("error mongo!");
+        }
+        else {
+            posts.map(user => {
+                finalHTML += "<p>" + user.text + "</p>";
+            })
+        }
+    })*/
+    /*$scope.to_trusted = function(html_code) {
+        return $sce.trustAsHtml(html_code);
+    }*/
+    /*$scope.product = finalHTML;
+});
+*/ 
+
+/*var Post = mongoose.model('Post', {
+    email: String,
+    text: String
+});*/
+
+    app.get('/feed_data', (req, res) => {
+        var finalHTML = "";
+        console.log("HERE");
+        var url = "mongodb://localhost:27017/timebank";
+        var db = mongoose.connect(url, {useNewUrlParser: true});
+        PostM.find({name: "user"}, (err, posts) => {
+            console.log(JSON.stringify(posts));
+            if (err) {
+                console.log("error mongo!");
+                console.log("error!");
+            }
+            else {
+                console.log(JSON.stringify(posts));
+                posts.map(p => {
+                    console.log(p)
+                    console.log("p string:" + JSON.stringify(p));
+                    finalHTML += "<p>" + p.text + "</p>";
+                    console.log(p.message);
+                });
+                //console.log(JSON.stringify(posts));
+            }
+            res.send(finalHTML);
+        });
+    });
+        //console.log(finalHTML);
+        
+
+
 // handler for HTTP 404 error: page not found
 app.use(function(req, res, next) {
     res.status(404).send("Page unavailable");
