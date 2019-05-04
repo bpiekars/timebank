@@ -4,3 +4,7 @@
 .form-control {
     width: 800px;
 }
+body{
+    font-size:1.2em;
+    font-family: "Helvetica";
+  }

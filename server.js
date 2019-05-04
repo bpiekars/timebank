@@ -17,6 +17,17 @@ app.use(expressValidator());
 // Set application port to 8080
 app.set('port', 8080);
 
+var PostS = new mongoose.Schema({
+    name: String,
+    text: String, // Text body of post
+    time: {
+        type: Date,
+        default: Date.now
+    } // Log date posted
+});
+
+var PostM = mongoose.model('PostM', PostS);
+
 // Tell express to parse user input as req.body
 app.use(bodyParser.urlencoded({
     extended: true
@@ -36,7 +47,7 @@ app.use(session({
     saveUninitialized: false, // only create session for users who login or register
     cookie: {
         expires: 600000 // set cookies to automatically expire 
-    },
+    }
 }));
 
 // Check if user is logged in
@@ -110,6 +121,7 @@ app.route('/register')
                             res.redirect('/registerfailure2.html'); // Tell user that email already found, redirect to registry
                         }
                     } else {
+                        // if there's no error, redirect to feed dashboard
                         // Log user data as will be saved to database
                         console.log('Saved to database:');
                         console.log(user);
@@ -161,7 +173,7 @@ app.route('/login')
                 bcrypt.hash(req.body.password, 10, function(err, hash) {
                     if (err) {
                         console.log(err);
-						res.sendFile(__dirname + "/public/loginfailure.html");
+                        res.redirect('/loginfailure'); // Redirect user to the login failure page
                     }
                 });
                 bcrypt.compare(req.body.password, user.password, function(err, result) {
@@ -211,33 +223,29 @@ app.route('/post')
         console.log('Post text:');
         console.log(req.body);
 
-        // Set post data to input text
-        var postData = {
-            message: req.body.message,
-            posted: new Date(),
-            author: req.body.email
-        };
-        // Log data to be saved to database to console
-        console.log('Saved to database:');
-        console.log(postData);
+        var postData = new PostM({
+            name: "user",
+            text: req.body.message
+        });
         // Create Post document using input text as post data
-        Post.create(postData, function(err) {
+        PostM.create(postData, function(err) {
             if (err) {
                 // If an error posting occurs, log to console and redirect back to feed page
                 console.log('Post unsuccessful');
-				res.sendFile(__dirname + "/public/feed_2.html");
+                res.sendFile(__dirname + "/public/feed_2.html");
             } else {
                 // If no error occurs, log success to console and redirect back to feed page (with new post added to top of feed)
                 console.log('Post successful');
-				res.sendFile(__dirname + "/public/feed_2success.html");
+                res.sendFile(__dirname + "/public/feed_2success.html");
             }
         });
     });
 // GET route to feed
 app.get('/feed_2', (req, res) => {
-    if (req.session.user && req.cookies.key) {
+    if (req.session.user && req.cookies.user_sid) {
         // if existing user session and cookies found, clear them and redirect to feed
         res.clearCookie('user_sid');
+        // redirect to feed anyway
         res.sendFile(__dirname + "/public/feed_2.html");
     } else {
         // redirect to feed anyway
@@ -260,6 +268,58 @@ app.get('/logout', (req, res) => {
         });
     }
 });
+
+function ensureAuthenticated(req, res, next) {
+    return next();
+}
+
+app.get('/flat', ensureAuthenticated, function(req, res, next) {
+    req.user.id = "1";
+    var flatFeed = FeedManager.getNewsFeeds(req.user.id)['flat'];
+
+    flatFeed.get({})
+        .then(function(body) {
+            var activities = body.results;
+            return StreamBackend.enrichActivities(activities);
+        })
+        .then(function(enrichedActivities) {
+            return res.render('feed', {
+                location: 'feed',
+                user: req.user,
+                activities: enrichedActivities,
+                path: req.url
+            });
+        })
+        .catch(next);
+});
+
+app.get('/feed_data', (req, res) => {
+    var finalHTML = "";
+    console.log("HERE");
+    var url = "mongodb://localhost:27017/timebank";
+    var db = mongoose.connect(url, {
+        useNewUrlParser: true
+    });
+    PostM.find({
+        name: "user"
+    }, (err, posts) => {
+        console.log(JSON.stringify(posts));
+        if (err) {
+            console.log("error mongo!");
+            console.log("error!");
+        } else {
+            console.log(JSON.stringify(posts));
+            posts.map(p => {
+                console.log(p)
+                console.log("p string:" + JSON.stringify(p));
+                finalHTML += "<p>" + p.text + "</p>";
+                console.log(p.message);
+            });
+        }
+        res.send(finalHTML);
+    });
+});
+
 // handler for HTTP 404 error: page not found
 app.use(function(req, res, next) {
     res.status(404).send("Page unavailable");
